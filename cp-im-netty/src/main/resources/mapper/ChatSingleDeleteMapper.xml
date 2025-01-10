@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cp.im.infrastructure.mapper.ChatSingleDeleteMapper">
+
+  <!--新增数据-->
+  <insert id="insertMessage" parameterType="java.util.List" useGeneratedKeys="true"
+    keyProperty="id">
+    INSERT INTO chat_single_delete (
+      user_id,
+      target_id
+    ) VALUES
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.userId},
+      #{item.targetId})
+    </foreach>
+  </insert>
+
+  <!--批量新增标记数据-->
+  <insert id="batchInsertWhisperDeleteFlag" parameterType="java.util.List" useGeneratedKeys="true"
+    keyProperty="id">
+    INSERT INTO chat_single_delete (
+      user_id,
+      target_id
+    ) VALUES
+    <foreach collection="list" item="item" index="index" separator=",">
+      (
+      #{item.userId},
+      #{item.targetId}
+      )
+    </foreach>
+  </insert>
+
+  <!--新增标记数据-->
+  <insert id="insertChatMessageRelation" parameterType="com.cp.im.domain.entity.ChatSingleDelete"
+    useGeneratedKeys="true" keyProperty="id">
+      INSERT INTO chat_single_delete (
+        user_id,
+        target_id
+      ) VALUES (
+        #{userId,jdbcType=BIGINT},
+        #{targetId,jdbcType=BIGINT}
+      )
+  </insert>
+
+  <!--更新删除标记.-->
+  <update id="updateDeleteFlag">
+    UPDATE chat_single_delete
+       SET sign_num = sign_num + 1
+     WHERE user_id = #{userId,jdbcType=BIGINT}
+       AND target_id  = #{targetId,jdbcType=BIGINT}
+  </update>
+
+  <!--标记时间-->
+  <select id="queryMessageTime" resultType="java.lang.String">
+    SELECT update_time
+      FROM chat_single_delete
+     WHERE user_id = #{userId,jdbcType=BIGINT}
+       AND target_id  = #{targetId,jdbcType=BIGINT}
+  </select>
+
+  <!--删除关联所有数据-->
+  <delete id="deleteMessageAll" parameterType="java.lang.Long">
+    DELETE FROM chat_single_delete
+     WHERE user_id = #{userId,jdbcType=BIGINT}
+  </delete>
+
+  <!--是否存在-->
+  <select id="isExists" resultType="java.lang.Integer">
+    SELECT COUNT(user_id)
+      FROM chat_single_delete
+     WHERE user_id = #{userId,jdbcType=BIGINT}
+       AND target_id  = #{targetId,jdbcType=BIGINT}
+  </select>
+</mapper>

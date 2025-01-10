@@ -1,0 +1,23 @@
+server:
+  port: 8291
+
+spring:
+  application:
+    name: SOCKET-SERVER
+  profiles:
+    active: dev
+
+---
+#开发环境配置
+spring:
+  profiles: dev
+  cloud:
+    nacos:
+      config:
+        server-addr: 192.168.2.114:8868
+        prefix: ${spring.application.name}
+        namespace: cp-dev
+        file-extension: yaml
+        group: cp-dev-group
+        username:
+        password: 

@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.cp.im.infrastructure.mapper.ChatSingleMapper">
+
+    <!--新增聊天关系-->
+    <insert id="newUserChatLink" parameterType="java.util.List" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO chat_single (
+        user_id,
+        target_id,
+        unread_num,
+        message_id,
+        message_time
+        ) VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.userId},
+            #{item.targetId},
+            #{item.unreadNum},
+            #{item.messageId},
+            #{item.messageTime})
+        </foreach>
+    </insert>
+
+    <!--批量新增聊天关系-->
+    <insert id="batchInsertWhisperChat" parameterType="java.util.List" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO chat_single
+        (
+        user_id,
+        target_id,
+        ) VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.userId},
+            #{item.targetId}
+            )
+        </foreach>
+    </insert>
+
+    <!--更新聊天状态-->
+    <update id="updateStatus" parameterType="com.cp.im.domain.dto.UpdateChatStatusDTO">
+        UPDATE chat_single
+        <set>
+            <if test="chatStatus != null">
+                chat_status = #{chatStatus,jdbcType=INTEGER},
+            </if>
+            <if test="unreadNum != null">
+                unread_num = #{unreadNum,jdbcType=INTEGER},
+            </if>
+        </set>
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <!--更新聊天设置-->
+    <update id="updateChatSetting" parameterType="com.cp.im.domain.entity.ChatSingle">
+        UPDATE chat_single
+        <set>
+            <if test="chatStatus != null">
+                chat_status = #{chatStatus,jdbcType=INTEGER},
+            </if>
+            <if test="unreadNum != null">
+                unread_num = #{unreadNum,jdbcType=INTEGER},
+            </if>
+            <if test="flagStar != null">
+                flag_star = #{flagStar,jdbcType=INTEGER},
+            </if>
+            <if test="flagTop != null">
+                flag_top = #{flagTop,jdbcType=INTEGER},
+            </if>
+            <if test="flagDelete != null">
+                flag_delete = #{flagDelete,jdbcType=INTEGER},
+            </if>
+            <if test="notDisturb != null">
+                not_disturb = #{notDisturb,jdbcType=INTEGER},
+            </if>
+            <if test="divideId != null">
+                divide_id = #{divideId,jdbcType=INTEGER},
+            </if>
+            <if test="alias != null and alias != ''">
+                alias = #{alias,jdbcType=VARCHAR},
+            </if>
+            <if test="messageId != null">
+                message_id = #{messageId,jdbcType=BIGINT},
+            </if>
+        </set>
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+        AND target_id = #{targetId,jdbcType=BIGINT}
+    </update>
+
+    <!--更新展示-->
+    <update id="updateChatShow" parameterType="com.cp.im.domain.dto.UpdateShowDTO">
+        UPDATE chat_single
+        <set>
+            <if test="flagDelete != null">
+                flag_delete = #{show,jdbcType=INTEGER},
+            </if>
+        </set>
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+        AND target_id = #{targetId,jdbcType=BIGINT}
+    </update>
+
+    <!--更新简略信息-->
+    <update id="updateBriefInfo" parameterType="com.cp.im.domain.entity.ChatSingle">
+        UPDATE chat_single
+        <set>
+            <if test="unreadNum != null">
+                unread_num = #{unreadNum,jdbcType=INTEGER},
+            </if>
+            <if test="messageId != null">
+                message_id = #{messageId,jdbcType=BIGINT},
+            </if>
+            <if test="flagDelete != null">
+                flag_delete = #{flagDelete,jdbcType=INTEGER},
+            </if>
+            <if test="messageTime != null">
+                message_time = #{messageTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateUserChatSetting">
+        UPDATE chat_single
+        SET unread_num   = #{unreadNum,jdbcType=INTEGER},
+            message_id   = #{messageId,jdbcType=BIGINT},
+            message_time = #{messageTime,jdbcType=TIMESTAMP},
+            flag_delete  = 0
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+          AND target_id = #{targetId,jdbcType=BIGINT}
+    </update>
+
+    <!--更新消息ID-->
+    <update id="updateMessageId" parameterType="com.cp.im.interfaces.dto.DeleteChatMsgDTO">
+        UPDATE chat_single
+        SET message_id = 0
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+          AND target_id = #{targetId,jdbcType=BIGINT}
+    </update>
+
+    <!--验证联系-->
+    <select id="userRelationIsExist" parameterType="com.cp.im.domain.base.ChatBase"
+            resultType="java.lang.Integer">
+        SELECT 1
+        FROM chat_single
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+          AND target_id = #{targetId,jdbcType=BIGINT}
+    </select>
+
+    <!--查询关系是否存在-->
+    <select id="queryRelationIsExist" parameterType="com.cp.im.domain.base.ChatBase"
+            resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM chat_single
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+          AND target_id = #{targetId,jdbcType=BIGINT}
+    </select>
+
+    <!--更新聊天状态-->
+    <update id="updateUserChatStatusAll" parameterType="java.lang.Long">
+        UPDATE chat_single
+        SET chat_status = 0
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+    </update>
+
+    <resultMap id="ChatSimpleInfoDTO" type="com.cp.im.domain.dto.ChatSimpleInfoDTO">
+    </resultMap>
+
+    <select id="getPrimaryKeyId" resultType="java.lang.Long">
+        SELECT id
+        FROM chat_single
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+          AND target_id = #{targetId,jdbcType=BIGINT}
+    </select>
+
+    <select id="getUnreadNumber" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT unread_num
+        FROM chat_single
+        WHERE id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <!--获得简略信息-->
+    <select id="getChatInfo" resultMap="ChatSimpleInfoDTO">
+        SELECT chat_status AS chatStatus,
+               flag_delete AS flagDelete,
+               flag_top    AS flagTop,
+               not_disturb AS notDisturb,
+               unread_num  AS unreadNum
+        FROM chat_single
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+          AND target_id = #{targetId,jdbcType=BIGINT}
+    </select>
+
+    <resultMap id="SingleChatSettingVO" type="com.cp.im.domain.vo.SingleChatSettingVO">
+    </resultMap>
+
+    <!--获得聊天设置-->
+    <select id="getChatSetting" parameterType="com.cp.im.interfaces.dto.QueryChatDTO" resultMap="SingleChatSettingVO">
+        SELECT flag_top    AS flagTop,
+               not_disturb AS notDisturb
+        FROM chat_single
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+          AND target_id = #{targetId,jdbcType=BIGINT}
+    </select>
+
+    <resultMap id="ChatSortDTO" type="com.cp.im.domain.dto.ChatSortDTO">
+    </resultMap>
+
+    <!--当前聊天列表-->
+    <select id="selectChatInfoList" resultMap="ChatSortDTO">
+        SELECT *
+        FROM (SELECT 1 AS sort, 0 AS groupId,
+        t1.target_id AS targetId,
+        t1.divide_id AS divideId,
+        '' AS thumbIconURL,
+        IF(t1.alias IS NULL, '', t1.alias) AS alias,
+        t1.flag_star AS flagStar,
+        t1.flag_top AS flagTop,
+        t1.not_disturb AS notDisturb,
+        t1.unread_num AS unreadNum,
+        IFNULL(IF(
+        t1.message_time >= #{pastTime,jdbcType=VARCHAR},
+        IF(t1.message_Id > 0, t2.message, ''),
+        ''
+        ), '') AS message,
+        NULL AS messageUser,
+        IFNULL(IF(
+        t1.message_time >= #{pastTime,jdbcType=VARCHAR},
+        IF(t1.message_Id > 0, t2.message_type, 0),
+        0
+        ), 0) AS messageType,
+        t1.message_time AS lastTime
+        FROM chat_single t1
+        LEFT JOIN chat_single_message t2
+        ON t1.message_id = t2.id
+        WHERE t1.flag_delete <![CDATA[<>]]> 1
+        AND t1.user_id = #{userId,jdbcType=BIGINT}
+        <if test="filterIds !=null and filterIds.size > 0">
+            AND t1.target_id IN
+            <foreach collection="filterIds" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        ) AS a
+        ORDER BY a.flagTop DESC, a.lastTime DESC
+    </select>
+
+    <select id="selectChatUserList" resultMap="ChatSortDTO">
+        SELECT *
+        FROM (SELECT 1 AS sort, 0 AS groupId,
+        t1.target_id AS targetId,
+        t1.divide_id AS divideId,
+        '' AS thumbIconURL,
+        IF(t1.alias IS NULL, '', t1.alias) AS alias,
+        t1.flag_star AS flagStar,
+        t1.flag_top AS flagTop,
+        t1.not_disturb AS notDisturb,
+        t1.unread_num AS unreadNum
+        FROM chat_single t1
+        WHERE t1.user_id = #{userId,jdbcType=BIGINT}
+        <if test="filterIds !=null and filterIds.size > 0">
+            AND t1.target_id IN
+            <foreach collection="filterIds" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        ) AS a
+        ORDER BY a.targetId DESC
+    </select>
+
+    <delete id="relieveChatRelation" parameterType="java.lang.Long">
+        DELETE
+        FROM chat_single
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+    </delete>
+
+    <delete id="relieveRelation">
+        DELETE
+        FROM chat_single
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+          AND target_id = #{targetId,jdbcType=BIGINT}
+    </delete>
+
+    <select id="checkUserRelation" resultType="java.lang.Integer">
+        SELECT COUNT(user_id)
+        FROM chat_single
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+          AND target_id = #{targetId,jdbcType=BIGINT}
+    </select>
+
+    <!--查询状态-->
+    <select id="queryStatus" parameterType="com.cp.im.domain.base.ChatBase"
+            resultType="java.lang.Integer">
+        SELECT chat_status
+        FROM chat_single
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+          AND target_id = #{targetId,jdbcType=BIGINT}
+    </select>
+
+    <!--获得未读数量-->
+    <select id="getUserUnreadNum" resultType="java.lang.Integer" parameterType="java.lang.Long">
+        SELECT IFNULL(SUM(unread_num), 0)
+        FROM chat_single
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+          AND not_disturb <![CDATA[<>]]> 1
+          AND flag_delete <![CDATA[<>]]> 1
+    </select>
+
+    <resultMap id="UpdateBase" type="com.cp.im.domain.base.UpdateBase">
+    </resultMap>
+
+    <!--获得更新基础信息-->
+    <select id="getUpdateBase" resultMap="UpdateBase">
+        SELECT id
+        FROM chat_single
+        WHERE user_id = #{userId,jdbcType=BIGINT}
+          AND target_id = #{targetId,jdbcType=BIGINT}
+    </select>
+
+    <select id="getUserBase" resultType="java.util.Map">
+        SELECT t1.user_id userId, ifnull(t1.alias,'') alias, t2.mobile mobile, t2.nickname nickName, t2.headurl iconUrl,
+            t1.flag_top    AS flagTop,
+            t1.flag_star   AS flagStar,
+            t1.not_disturb AS notDisturb,
+            t1.unread_num  AS unreadNum
+        FROM chat_single t1 left join useraccount t2 on t1.user_id = t2.id
+        WHERE t1.user_id = #{userId,jdbcType=BIGINT}
+          AND t1.target_id = #{targetId,jdbcType=BIGINT}
+    </select>
+
+    <select id="getUserBase2" resultType="java.util.Map">
+        SELECT t1.user_id userId, ifnull(t1.alias,'') alias, t2.mobile mobile, t2.nickname nickName, t2.headurl iconUrl,
+               t1.flag_top    AS flagTop,
+               t1.flag_star   AS flagStar,
+               t1.not_disturb AS notDisturb,
+               t1.unread_num  AS unreadNum
+        FROM chat_single t1 left join useraccount t2 on t1.target_id = t2.id
+        WHERE t1.user_id = #{userId,jdbcType=BIGINT}
+          AND t1.target_id = #{targetId,jdbcType=BIGINT}
+    </select>
+
+    <select id="filterChatList" resultType="java.lang.Long">
+        SELECT t2.id AS filterId
+        FROM `chat_single` t1
+                 LEFT JOIN useraccount t2 ON t1.target_id = t2.id
+        WHERE t1.user_id = #{userId}
+          AND (t2.mobile LIKE CONCAT('%', #{filterName}, '%') or t1.alias LIKE CONCAT('%', #{filterName}, '%'))
+    </select>
+
+    <!--根据当前用户ID，获取目标用户基本信息.-->
+    <select id="getUserBaseList" resultType="java.util.Map">
+        SELECT id AS userId,
+        mobile AS mobile,
+        headurl AS iconUrl
+        FROM useraccount
+        <where>
+            AND id IN
+            <foreach collection="list" item="userId" open="(" close=")" separator=",">
+                #{userId}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="getUser" resultType="java.util.Map">
+        SELECT id,password,usertype,headurl,nickname
+        FROM useraccount
+        WHERE mobile = #{mobile} limit 1
+    </select>
+
+    <select id="getTargetList" resultType="java.lang.Long">
+        SELECT b.id
+        FROM useraccount a left join useraccount b on a.kfid = b.kfid
+        WHERE a.id = #{userId} and b.usertype=-1
+    </select>
+
+    <select id="getToken" resultType="java.lang.String">
+        SELECT token
+        FROM usertoken
+        WHERE userid = #{userId} and status=1 and etime > sysdate() limit 1
+    </select>
+
+    <insert id="insertToken" parameterType="com.cp.im.domain.entity.TokenInfo"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO usertoken (
+            userid,
+            token,
+            status,
+            etime,
+            atime
+        ) VALUES (
+                     #{userId,jdbcType=BIGINT},
+                     #{token,jdbcType=VARCHAR},
+                     #{status,jdbcType=INTEGER},
+                     #{eTime,jdbcType=TIMESTAMP},
+                     #{aTime,jdbcType=TIMESTAMP}
+                 )
+    </insert>
+</mapper>

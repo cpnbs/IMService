@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cp.im.infrastructure.mapper.ChatEmoticonMapper">
+
+    <resultMap id="ChatEmoticonVO" type="com.cp.im.domain.vo.ChatEmoticonVO">
+    </resultMap>
+
+    <!--获得表情-->
+    <select id="selectEmoticon" parameterType="java.lang.Integer" resultMap="ChatEmoticonVO">
+        SELECT IF(category_id = 0, id, category_id) AS categoryId,
+               em_name                              AS emName,
+               em_url                               AS emUrl,
+               dong_url                             AS dongUrl
+        FROM chat_emoticon
+        WHERE category_id = #{categoryId,jdbcType=INTEGER}
+        ORDER BY sort ASC
+    </select>
+
+    <resultMap id="ChatDivideVO" type="com.cp.im.domain.vo.ChatDivideVO">
+    </resultMap>
+
+    <!--获得分组-->
+    <select id="selectDivide" resultMap="ChatDivideVO">
+        SELECT id,
+               name
+        FROM chat_divide
+        ORDER BY sort ASC
+    </select>
+
+    <resultMap id="ChatQaVO" type="com.cp.im.domain.vo.ChatQaVO">
+    </resultMap>
+
+    <!--获得问答-->
+    <select id="selectQa" resultMap="ChatQaVO">
+        SELECT id,
+        qa
+        FROM chat_qa
+        <where>
+            and user_id = #{userId,jdbcType=BIGINT}
+            <if test="qa != null and qa != ''">
+                and qa LIKE CONCAT('%', #{qa}, '%')
+            </if>
+        </where>
+        ORDER BY sort ASC
+    </select>
+
+    <insert id="insertQa">
+        INSERT INTO chat_qa (user_id,
+                             qa)
+        VALUES (#{userId,jdbcType=BIGINT},
+                #{qa,jdbcType=VARCHAR})
+    </insert>
+
+    <delete id="deleteQa">
+        DELETE
+        FROM chat_qa
+        WHERE id = #{id}
+    </delete>
+
+    <update id="updateQa">
+        update chat_qa
+        set qa = #{qa,jdbcType=VARCHAR}
+        WHERE id = #{id}
+    </update>
+</mapper>
